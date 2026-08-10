@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--
+    Mage-OS
+    Copyright (c) Mage-OS Association (https://mage-os.org/)
+    SPDX-License-Identifier: MIT
+
+    Forked from mage-os/module-rma 2.4.1 into Magenx_Rma / Magenx_RmaGraphQl;
+    identifiers renamed, GraphQL surface split into a sibling module.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magenx_Rma::rma"
+             title="RMA"
+             translate="title"
+             module="Magenx_Rma"
+             sortOrder="100"
+             parent="Magento_Sales::sales"
+             resource="Magenx_Rma::rma"/>
+        <add id="Magenx_Rma::rma_manage"
+             title="Manage RMA Requests"
+             translate="title"
+             module="Magenx_Rma"
+             sortOrder="10"
+             parent="Magenx_Rma::rma"
+             action="rma/rma/index"
+             resource="Magenx_Rma::rma_manage"/>
+        <add id="Magenx_Rma::rma_status"
+             title="RMA Statuses"
+             translate="title"
+             module="Magenx_Rma"
+             sortOrder="20"
+             parent="Magenx_Rma::rma"
+             action="rma/status/index"
+             resource="Magenx_Rma::rma_status"/>
+        <add id="Magenx_Rma::rma_reason"
+             title="RMA Reasons"
+             translate="title"
+             module="Magenx_Rma"
+             sortOrder="30"
+             parent="Magenx_Rma::rma"
+             action="rma/reason/index"
+             resource="Magenx_Rma::rma_reason"/>
+        <add id="Magenx_Rma::rma_resolution_type"
+             title="RMA Resolution Types"
+             translate="title"
+             module="Magenx_Rma"
+             sortOrder="40"
+             parent="Magenx_Rma::rma"
+             action="rma/resolutionType/index"
+             resource="Magenx_Rma::rma_resolution_type"/>
+        <add id="Magenx_Rma::rma_item_condition"
+             title="RMA Item Conditions"
+             translate="title"
+             module="Magenx_Rma"
+             sortOrder="50"
+             parent="Magenx_Rma::rma"
+             action="rma/itemCondition/index"
+             resource="Magenx_Rma::rma_item_condition"/>
+    </menu>
+</config>

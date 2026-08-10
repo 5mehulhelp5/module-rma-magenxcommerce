@@ -1,0 +1,153 @@
+<?php
+/**
+ * Mage-OS
+ * Copyright (c) Mage-OS Association (https://mage-os.org/)
+ * SPDX-License-Identifier: MIT
+ *
+ * Forked from mage-os/module-rma 2.4.1 into Magenx_Rma / Magenx_RmaGraphQl;
+ * identifiers renamed, GraphQL surface split into a sibling module.
+ */
+use Magenx\Rma\Block\Adminhtml\Rma\Edit\Comments;
+
+/**
+ * @var Comments $block
+ */
+
+if (!$block->isEditMode()) {
+    return;
+}
+
+$comments = $block->getComments();
+$attachments = $block->getAttachments();
+$rmaId = $block->getRmaId();
+$lastId = 0;
+if (!empty($comments)) {
+    $lastComment = end($comments);
+    $lastId = $lastComment['entity_id'];
+}
+
+$downloadUrl = $block->getDownloadUrl();
+$deleteUrl = $block->getDeleteUrl();
+?>
+<div class="admin__fieldset" id="rma-attachments-section" style="margin-bottom: 20px;">
+    <div class="admin__field-complex-title">
+        <span class="title"><?= $escaper->escapeHtml(__('Attachments')) ?></span>
+    </div>
+    <div style="border: 1px solid #ccc; padding: 10px; background: #fafafa;">
+        <ul id="rma-all-attachments" style="list-style: none; padding: 0; margin: 0;">
+            <?php if (empty($attachments)): ?>
+                <li class="rma-no-attachments" style="color: #999; font-style: italic; padding: 4px 0;">
+                    <?= $escaper->escapeHtml(__('No attachments yet.')) ?>
+                </li>
+            <?php else: ?>
+                <?php foreach ($attachments as $att): ?>
+                    <li data-attachment-id="<?= (int)$att['entity_id'] ?>" style="padding: 4px 0; border-bottom: 1px solid #eee;">
+                        <a href="<?= $escaper->escapeUrl($block->getAttachmentDownloadUrl((int)$att['entity_id'])) ?>"
+                           target="_blank" style="color: #1979c3; text-decoration: none;">
+                            &#128206; <?= $escaper->escapeHtml($att['file_name']) ?>
+                        </a>
+                        <span style="color: #999; font-size: 12px;">
+                            (<?= $escaper->escapeHtml($att['file_size_label']) ?>)
+                        </span>
+                        <button type="button" class="rma-unified-attachment-delete" data-id="<?= (int)$att['entity_id'] ?>"
+                                style="color: #e22626; cursor: pointer; border: none; background: none; font-size: 11px; padding: 0; margin-left: 4px;">
+                            <?= $escaper->escapeHtml(__('Delete')) ?>
+                        </button>
+                    </li>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </ul>
+    </div>
+</div>
+
+<div class="admin__fieldset" id="rma-comments-section">
+    <div class="admin__field-complex-title">
+        <span class="title"><?= $escaper->escapeHtml(__('Comments')) ?></span>
+    </div>
+
+    <div id="rma-comments-timeline" class="rma-comments-timeline" style="max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 15px; background: #fafafa;">
+        <?php if (empty($comments)): ?>
+            <p class="rma-no-comments" style="color: #999; font-style: italic;"><?= $escaper->escapeHtml(__('No comments yet.')) ?></p>
+        <?php else: ?>
+            <?php foreach ($comments as $comment): ?>
+                <div class="rma-comment <?= $escaper->escapeHtmlAttr($comment['author_type']) ?>"
+                     data-comment-id="<?= (int)$comment['entity_id'] ?>"
+                     style="margin-bottom: 10px; padding: 8px 12px; border-radius: 6px; <?= $comment['author_type'] === 'admin' ? 'background: #e8f0fe; margin-left: 20px;' : 'background: #fff; margin-right: 20px; border: 1px solid #ddd;' ?>">
+                    <div style="font-size: 11px; color: #666; margin-bottom: 4px;">
+                        <strong><?= $escaper->escapeHtml($comment['author_name']) ?></strong>
+                        <span style="margin-left: 8px;"><?= $escaper->escapeHtml($comment['created_at']) ?></span>
+                        <?php if (!$comment['is_visible_to_customer']): ?>
+                            <span style="margin-left: 8px; color: #e67700; font-weight: bold;"><?= $escaper->escapeHtml(__('Internal Note')) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div style="white-space: pre-wrap;"><?= $escaper->escapeHtml($comment['comment']) ?></div>
+                    <?php if (!empty($comment['attachments'])): ?>
+                        <div class="rma-comment-attachments" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.1);">
+                            <?php foreach ($comment['attachments'] as $att): ?>
+                                <div class="rma-attachment-item" style="font-size: 11px; margin-top: 3px;">
+                                    <a href="<?= $escaper->escapeUrl($downloadUrl . (str_contains($downloadUrl, '?') ? '&' : '?') . 'id=' . (int)$att['entity_id']) ?>"
+                                       target="_blank" style="color: #1979c3; text-decoration: none;">
+                                        &#128206; <?= $escaper->escapeHtml($att['file_name']) ?>
+                                    </a>
+                                    <button type="button" class="rma-attachment-delete" data-id="<?= (int)$att['entity_id'] ?>"
+                                            style="color: #e22626; cursor: pointer; border: none; background: none; font-size: 11px; padding: 0; margin-left: 4px;">
+                                        <?= $escaper->escapeHtml(__('Delete')) ?>
+                                    </button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+
+    <div class="rma-comment-form" style="margin-bottom: 10px;">
+        <textarea id="rma-comment-text" rows="3" style="width: 100%; box-sizing: border-box;"
+                  placeholder="<?= $escaper->escapeHtmlAttr(__('Type your comment...')) ?>"></textarea>
+        <div class="rma-comment-upload-widget" style="margin-top: 8px;"
+             data-mage-init='{"Magenx_Rma/js/rma-file-upload": {
+                 "uploadUrl": "<?= $escaper->escapeUrl($block->getUploadUrl()) ?>",
+                 "allowedExtensions": "<?= $escaper->escapeHtmlAttr($block->getAllowedExtensions()) ?>",
+                 "maxFileSize": <?= (int)$block->getMaxFileSize() ?>,
+                 "maxFiles": <?= (int)$block->getMaxFiles() ?>,
+                 "formKey": "<?= $escaper->escapeJs($block->getFormKey()) ?>"
+             }}'>
+            <div class="rma-upload-dropzone" style="border: 2px dashed #ccc; border-radius: 4px; padding: 12px; text-align: center; cursor: pointer; background: #fafafa;">
+                <span style="color: #666; font-size: 12px;"><?= $escaper->escapeHtml(__('Drag & drop files here or click to browse')) ?></span>
+                <br/>
+                <span style="font-size: 11px; color: #999;">
+                    <?= $escaper->escapeHtml(__('Allowed: %1 | Max size: %2 MB | Max files: %3', $block->getAllowedExtensions(), $block->getMaxFileSize(), $block->getMaxFiles())) ?>
+                </span>
+            </div>
+            <input type="file" class="rma-upload-input" style="display: none;" multiple/>
+            <div class="rma-upload-list" style="margin-top: 4px;"></div>
+            <input type="hidden" class="rma-upload-data" value="[]"/>
+        </div>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 15px;">
+            <label>
+                <input type="checkbox" id="rma-comment-visible" checked="checked"/>
+                <?= $escaper->escapeHtml(__('Visible to Customer')) ?>
+            </label>
+            <button type="button" id="rma-comment-submit" class="action-default scalable action-secondary">
+                <span><?= $escaper->escapeHtml(__('Add Comment')) ?></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-magento-init">
+{
+    "#rma-comments-section": {
+        "Magenx_Rma/js/rma-comments": {
+            "rmaId": <?= (int)$rmaId ?>,
+            "saveUrl": "<?= $escaper->escapeJs($block->getSaveUrl()) ?>",
+            "loadListUrl": "<?= $escaper->escapeJs($block->getLoadListUrl()) ?>",
+            "lastCommentId": <?= (int)$lastId ?>,
+            "isAdmin": true,
+            "downloadUrl": "<?= $escaper->escapeJs($block->getDownloadUrl()) ?>",
+            "deleteUrl": "<?= $escaper->escapeJs($block->getDeleteUrl()) ?>"
+        }
+    }
+}
+</script>

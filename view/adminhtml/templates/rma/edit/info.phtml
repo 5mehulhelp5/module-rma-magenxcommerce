@@ -1,0 +1,98 @@
+<?php
+/**
+ * Mage-OS
+ * Copyright (c) Mage-OS Association (https://mage-os.org/)
+ * SPDX-License-Identifier: MIT
+ *
+ * Forked from mage-os/module-rma 2.4.1 into Magenx_Rma / Magenx_RmaGraphQl;
+ * identifiers renamed, GraphQL surface split into a sibling module.
+ */
+use Magenx\Rma\Block\Adminhtml\Rma\Edit\Info;
+use Magenx\Rma\Api\Data\RMAInterface;
+
+/**
+ * @var Info $block
+ * @var RMAInterface $rma
+ */
+$rma = $block->getRma();
+
+if (!$rma) {
+    return;
+}
+
+$orderId = (int)$rma->getOrderId();
+$storeId = (int)$rma->getStoreId();
+$orderIncrementId = $block->getOrderIncrementId($orderId);
+$customerId = $rma->getCustomerId();
+$customerName = $escaper->escapeHtml($rma->getCustomerName());
+$customerEmail = $escaper->escapeHtml($rma->getCustomerEmail());
+$isGuest = empty($customerId);
+$createdAt = $block->getFormattedDate($rma->getCreatedAt(), $storeId);
+$storeName = $escaper->escapeHtml($block->getStoreName($storeId), ['br']);
+?>
+<section class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $escaper->escapeHtml(__('RMA Information')) ?></span>
+    </div>
+<div class="admin__page-section-content rma-info-columns">
+    <div class="admin__page-section-item rma-info-left">
+        <div class="admin__page-section-item-title">
+            <span class="title"><?= $escaper->escapeHtml(__('RMA Details')) ?></span>
+        </div>
+        <div class="admin__page-section-item-content">
+            <table class="admin__table-secondary">
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('RMA #')) ?></th>
+                    <td><?= $escaper->escapeHtml($rma->getIncrementId()) ?></td>
+                </tr>
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('Purchased From')) ?></th>
+                    <td><?= $storeName ?></td>
+                </tr>
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('Created At')) ?></th>
+                    <td><?= $escaper->escapeHtml($createdAt) ?></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="admin__page-section-item rma-info-right">
+        <div class="admin__page-section-item-title">
+            <span class="title"><?= $escaper->escapeHtml(__('Customer & Order')) ?></span>
+        </div>
+        <div class="admin__page-section-item-content">
+            <table class="admin__table-secondary">
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('Order #')) ?></th>
+                    <td>
+                        <?php if ($orderIncrementId): ?>
+                            <a href="<?= $escaper->escapeUrl($block->getOrderUrl($orderId)) ?>">#<?= $escaper->escapeHtml($orderIncrementId) ?></a>
+                        <?php else: ?>
+                            <?= (int)$orderId ?>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('Customer')) ?></th>
+                    <td>
+                        <?php if ($isGuest): ?>
+                            <?= $customerName ?> <span class="rma-guest-label">(<?= $escaper->escapeHtml(__('Guest')) ?>)</span>
+                        <?php else: ?>
+                            <a href="<?= $escaper->escapeUrl($block->getCustomerUrl((int)$customerId)) ?>"><?= $customerName ?></a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('Email')) ?></th>
+                    <td><a href="mailto:<?= $customerEmail ?>"><?= $customerEmail ?></a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+</section>
+<style>
+    .rma-info-columns { display: flex; gap: 2rem; }
+    .rma-info-columns .admin__page-section-item { flex: 1; min-width: 0; }
+    .rma-guest-label { color: #999; font-style: italic; }
+</style>

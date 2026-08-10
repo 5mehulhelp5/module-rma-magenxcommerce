@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © Magenx. All rights reserved.
+    SPDX-License-Identifier: MIT
+
+    Original work, part of the Magenx fork of mage-os/module-rma
+    (MIT, Copyright (c) Mage-OS Association) — see LICENSE.
+
+    Magenx_Rma — RMA backend engine.
+
+    Magento_GraphQl is deliberately NOT sequenced here: the GraphQL surface
+    lives in the sibling Magenx_RmaGraphQl module (the Catalog / CatalogGraphQl
+    split), so this module can be deployed on a store that never exposes
+    returns over GraphQL.
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="Magenx_Rma">
+        <sequence>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Customer"/>
+            <module name="Magento_Store"/>
+            <module name="Magento_Config"/>
+            <module name="Magento_Ui"/>
+            <module name="Magento_Webapi"/>
+        </sequence>
+    </module>
+</config>
